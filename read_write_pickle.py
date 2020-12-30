@@ -7,7 +7,3 @@ def read_pickle(file_name):
     with open(file_name, 'rb') as handle:
         return pickle.load(handle)
 
-
-write_pickle('data/categories_red.pkl', categories_red)
-
-categories_red  = read_pickle('data/categories_red.pkl')
