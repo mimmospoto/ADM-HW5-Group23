@@ -185,6 +185,9 @@ def cat_subgraph(c1, c2, df):
     
     #convert input graph in a dict and give that as output
     sub_graph = get_graph_dictionary(sub_df)
+    for key,val in sub_graph.items():
+    if isinstance(sub_graph[key], int):
+        sub_graph[key] = [sub_graph[key]]
 
     return sub_graph
 
@@ -220,6 +223,50 @@ def find_hyperlinks(graph, u, v, link=[]):
 
 def min_hyperlinks(graph, u, v):
     return len(find_hyperlinks(graph, u, v))
+
+"""
+-------------------------------------------------------------------
+REQUEST 5
+-------------------------------------------------------------------
+"""
+
+def relevant_pages(c, df):
+    a = cat[c]
+    
+    d1 = df[df['Source'].isin(a)]
+    d2 = df[df['Target'].isin(a)]
+    
+    concat = [d1['Source'], d2['Target']]
+    df_concat = pd.concat(concat)
+    d = list(df_concat.unique())
+    
+    return d
+
+def page_distance(start, category, df, sub_graph, visited, distance):
+    queue = [] + [start]
+    order = 0
+    visited[start] = True 
+    distance[start] = order
+    l = relevant_pages(category, df)
+    distances = []
+    
+    while len(queue) > 0 :
+        order += 1     
+        z = queue[0]
+        queue.pop(0)
+        
+        for i in sub_graph[z]:
+            if i in l:
+                if visited[i] == False:
+                    queue.append(i)
+                    visited[i] = True
+                if distance[i] > distance[z]:
+                    distance [i] = distance[z] + 1
+                    distances.append(distance[i])
+
+    return distances
+
+
 
 """
 -------------------------------------------------------------------
