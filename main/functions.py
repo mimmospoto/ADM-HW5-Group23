@@ -60,12 +60,12 @@ class Graph(object):
     # get the edges of the graph
     def edges(self):
         edges_lst = []
-        for node in g.graph_d:
+        for node in self.graph_d:
             try:
-                for neigh in g.graph_d[node]:
+                for neigh in self.graph_d[node]:
                     edges_lst.append((node, neigh))
             except TypeError:
-                edges_lst.append((node, g.graph_d[node]))
+                edges_lst.append((node, self.graph_d[node]))
         return edges_lst
 
 
@@ -100,3 +100,40 @@ def density_graph(g):
 REQUEST 2
 -------------------------------------------------------------------
 """
+
+
+"""
+-------------------------------------------------------------------
+REQUEST 3
+-------------------------------------------------------------------
+"""
+def in_degree_centrality(data):
+    """
+    function that look for the in-degree values of each node
+    """
+    concat = [data['Source'], data['Target']]    # concat all the nodes
+    all_nodes = list(pd.concat(concat).unique()) # get the list of the unique values
+    in_degree = dict.fromkeys(all_nodes, 0)      # dict with keys all the nodes and values the 0s
+    only_target_node = list(data.Target)         # list of the target nodes which have at least a in-degree value
+    for node in only_target_node:
+        in_degree[node] +=1                      # for each node in the target, update the dict adding 1
+    return in_degree
+
+def most_central_article(category, in_degree_dict):
+    """
+    function that return the vertex with the highest in-degree centrality
+    """
+    max_in_degree_value = 0
+    max_in_degree_vertex = ''
+    not_degree_article = []
+
+    for vertex in category:
+        if vertex in in_degree_dict:
+            vertex_degree = in_degree_dict[vertex]
+            if vertex_degree > max_in_degree_value:
+                max_in_degree_value = vertex_degree
+                max_in_degree_vertex = vertex
+        else:
+            not_degree_article.append(vertex)
+            continue
+    return max_in_degree_vertex, max_in_degree_value, not_degree_article
