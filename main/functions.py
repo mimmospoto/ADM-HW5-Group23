@@ -4,7 +4,7 @@ import random
 from tqdm import tqdm
 import pickle
 import numpy as np
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 
 """
@@ -137,3 +137,101 @@ def most_central_article(category, in_degree_dict):
             not_degree_article.append(vertex)
             continue
     return max_in_degree_vertex, max_in_degree_value, not_degree_article
+
+
+"""
+-------------------------------------------------------------------
+REQUEST 4
+-------------------------------------------------------------------
+"""
+#first function
+def get_graph_dictionary(data):
+
+    concat = [data['Source'], data['Target']]
+    df_concat = pd.concat(concat)
+    data_2 = data.set_index('Source')
+
+
+    graph = defaultdict(list)
+    for row in df_concat.unique():
+        try:
+            graph[row] = data_2.loc[row, 'Target'].tolist()
+        except AttributeError:
+            graph[row] = data_2.loc[row, 'Target'].flatten().tolist()
+        except KeyError:
+            graph[row]
+    return(graph)
+
+def cat_subgraph(c1, c2, df):
+    
+    #first get the two lists of pages of the categories
+    a = cat[c1]
+    b = cat[c2]
+    
+    #given those lists, find the sources for both
+    source_a = df[df['Source'].isin(a)]
+    source_b = df[df['Source'].isin(b)]
+    
+    #now find the edges, that have as targets the other list
+    edges_ab = source_a[source_a['Target'].isin(b)]
+    edges_ba = source_b[source_b['Target'].isin(a)]
+    
+    #edges within the categories
+    edges_aa = source_a[source_a['Target'].isin(a)]
+    edges_bb = source_b[source_b['Target'].isin(b)]
+    
+    #put them together
+    sub_df = pd.concat([edges_ab, edges_ba, edges_aa, edges_bb])
+    
+    #convert input graph in a dict and give that as output
+    sub_graph = get_graph_dictionary(sub_df)
+
+    return sub_graph
+
+def show_first_order_neigbors(G, start_node):
+    try: 
+        sub_nodes = [n for n in G[start_node]]
+        edges_sub = [item for item in g.edges() if item[0] == start_node]
+        G_sub = nx.DiGraph()
+        G_sub.add_nodes_from(sub_nodes)
+        G_sub.add_edges_from(edges_sub)
+        pos = nx.spring_layout(G_sub)
+        nx.draw_networkx_nodes(G_sub, pos, cmap=plt.get_cmap('jet'), 
+                               node_color = "orange", node_size = 800)
+        nx.draw_networkx_labels(G_sub, pos)
+        nx.draw_networkx_edges(G_sub, pos, arrows=True)
+        plt.show()
+    except:
+        print("No link avaible")
+
+
+# second function
+def find_hyperlinks(graph, u, v, link=[]):
+        link = link + [u]
+        final_links = []
+        if u == v:
+            return [link]
+        for i in graph[u]:
+            if i not in link:
+                other_links = find_hyperlinks(graph, i, v, link)
+                for l in other_links: 
+                    final_links.append(l)
+        return final_links
+
+def min_hyperlinks(graph, u, v):
+    return len(find_hyperlinks(graph, u, v))
+
+"""
+-------------------------------------------------------------------
+REQUEST 6
+-------------------------------------------------------------------
+"""
+def out_degree_centrality(g):
+    out_deg_list = []
+    for key in g.graph_d:
+        if isinstance(g.graph_d[key], list):
+            out_deg_list.append(len(g.graph_d[key]))
+        elif (isinstance(g.graph_d[key], int)): 
+            out_deg_list.append(1) 
+    out_deg = Counter(sorted(out_deg_list))
+    return out_deg
