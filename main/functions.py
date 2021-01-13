@@ -186,8 +186,8 @@ def cat_subgraph(c1, c2, df):
     #convert input graph in a dict and give that as output
     sub_graph = get_graph_dictionary(sub_df)
     for key,val in sub_graph.items():
-    if isinstance(sub_graph[key], int):
-        sub_graph[key] = [sub_graph[key]]
+        if isinstance(sub_graph[key], int):
+            sub_graph[key] = [sub_graph[key]]
 
     return sub_graph
 
