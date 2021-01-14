@@ -35,43 +35,50 @@ REQUEST 1
 
 
 def get_graph_dictionary(data):
+    """
+    Create a graph structure
+    """
+    concat = [data['Source'], data['Target']] # merge in a list the data columns Source and Target
+    df_concat = pd.concat(concat)             # concatenate them
+    data_2 = data.set_index('Source')         # set a  index the Source column
 
-    concat = [data['Source'], data['Target']]
-    df_concat = pd.concat(concat)
-    data_2 = data.set_index('Source')
 
-
-    graph = defaultdict(list)
+    graph = defaultdict(list)                 # initialize the nested dictionary 
     for row in tqdm(df_concat.unique()):
         try:
-            graph[row] = data_2.loc[row, 'Target'].tolist()
+            graph[row] = data_2.loc[row, 'Target'].tolist()   # append in the values the Target vertices
         except AttributeError:
-            graph[row] = data_2.loc[row, 'Target'].flatten().tolist()
+            graph[row] = data_2.loc[row, 'Target'].flatten().tolist() # append in the values the Target vertex
         except KeyError:
-            graph[row]
+            graph[row]                         # append empty list
     return(graph)
 
 class Graph(object):
-
+    """
+    Create a graph class
+    """
     def __init__(self, graph_d=None):
         if graph_d == None:
             graph_d = {}
-        self.graph_d = graph_d
+        self.graph_d = graph_d     # initialize the graph
     # get the vertices of the graph
     def vertices(self):
-        return list(self.graph_d.keys())
+        return list(self.graph_d.keys())  # build the vertices
     # get the edges of the graph
-    def edges(self):
-        edges_lst = []
+    def edges(self):                
+        edges_lst = []          
         for node in self.graph_d:
             try:
                 for neigh in self.graph_d[node]:
                     edges_lst.append((node, neigh))
             except TypeError:
-                edges_lst.append((node, self.graph_d[node]))
+                edges_lst.append((node, self.graph_d[node]))  # append each edge in a tuple
         return edges_lst
 
 def average_number_pages1(g):
+    """
+    Method to calculate the average number of links in a random page
+    """
     idx = (random.choice(g.vertices()))
     if isinstance(g.graph_d[idx], list):
         return (len(g.graph_d[idx]))
@@ -79,19 +86,10 @@ def average_number_pages1(g):
         return 1
 
 
-def average_number_pages(g):
-    """
-    Method to calculate the average number of links in a random page
-    """
-    arbitrary_page = random.choice(g.vertices())
-    av_number_links_lst = []
-    for link in g.graph_d[arbitrary_page]:
-        av_number_links_lst.append(link)
-    av_number_links = len(av_number_links_lst)
-    return av_number_links
-
-
 def density_graph(g):
+    """
+    Function to compute the density of a directed graph
+    """
     V = len(g.vertices())
     E = len(g.edges())
     return E / (V *(V - 1))
@@ -124,11 +122,11 @@ def pages_reached(page, click, dic):
     page_list.append(str(page))
     for no_of_click in range(click): #This will run as per number of clicks
         new_lst = []                 
-        for i in page_list:
-            for j in dic[i]:
-                new_lst.append(str(j))
-                total_pages.append(str(j))
-        page_list = new_lst
+        for i in page_list: # loop each page in the list
+            for j in dic[i]: # loop each neighbor in the page
+                new_lst.append(str(j))  #append the neighbors in new list
+                total_pages.append(str(j)) # append the neighbors in new list
+        page_list = new_lst  #update the list to loop in
     return total_pages
 
 """
@@ -152,41 +150,44 @@ def most_central_article(category, in_degree_dict):
     """
     function that return the vertex with the highest in-degree centrality
     """
-    max_in_degree_value = 0
-    max_in_degree_vertex = ''
-    not_degree_article = []
+    max_in_degree_value = 0   # set the max in degree value to 0
+    max_in_degree_vertex = '' # set the max in degree vertex to empty string
+    not_degree_article = []   # set the not degree list as empty
 
-    for vertex in category:
-        if vertex in in_degree_dict:
-            vertex_degree = in_degree_dict[vertex]
-            if vertex_degree > max_in_degree_value:
-                max_in_degree_value = vertex_degree
-                max_in_degree_vertex = vertex
+    for vertex in category:   # loop in each vertex of the chosen category
+        if vertex in in_degree_dict:  # check if the vertex is in the graph
+            vertex_degree = in_degree_dict[vertex] 
+            if vertex_degree > max_in_degree_value: # if vertex in degree is higher than 0 or the old max value, update it
+                max_in_degree_value = vertex_degree # update the max in degree value
+                max_in_degree_vertex = vertex       # update the max in degree vertex
         else:
-            not_degree_article.append(vertex)
+            not_degree_article.append(vertex)       # append the articles that are not in the graph, that do not have a in degree value
             continue
     return max_in_degree_vertex, max_in_degree_value, not_degree_article
 
 def minimum_number_clicks(graph, categories_red, data):
+    """
+    function that return the vertex with the highest in-degree centrality
+    """
     print('Write the category')
     while True:
-        category_input = str(input())
-        if category_input not in categories_red:
+        category_input = str(input()) # obtain the category as input
+        if category_input not in categories_red: # check if category exist
             print(category_input, ' not exist as category, change category')
         else:
             break
     print()
     print("Write the set of pages in the category chosen separated by a ',':")
-    pages_input = input()
+    pages_input = input()      # get the numeber of pages to look for
     pages_input = pages_input.split(',')
     pages_input = [int(i) for i in pages_input]
 
     print()
     pages_not = []
-    for pages in pages_input:
-        if pages not in categories_red[category_input]:
+    for pages in pages_input:  # loop over the pages in input
+        if pages not in categories_red[category_input]: # check if pages are in the category chosen
             print(pages, ' not in ', category_input)
-            pages_not.append(pages)
+            pages_not.append(pages)                     # append the pages that are not in the category chosen
     pages_input = [i for i in pages_input if i not in pages_not]  
     
     graph = graph                       # the graph
@@ -202,20 +203,20 @@ def minimum_number_clicks(graph, categories_red, data):
     reached_vertex = []                  # initialize the list of reached vertex
     number_of_click = 0
 
-    while queue:
-        if reached < (len(pages_input)):
-            v = queue.pop(0)
+    while queue:  # while queue is active, so there is at least one element in it
+        if reached < (len(pages_input)):  # control if the reached value is more than the length of the input pages to reach
+            v = queue.pop(0)     # pop the first value in queue and get that value
             
             try:
-                number_of_click += 1
-                for i in graph[v]:
-                    if visited[i] == False:
-                        visited[i] = True
-                        queue.append(i)
+                number_of_click += 1   # sum the numeber of click
+                for i in graph[v]:    # loop over the neighbors of the page
+                    if visited[i] == False:  # check if the page is already visited or not
+                        visited[i] = True    # mark as true
+                        queue.append(i)      # append in the queue the vertex
                     
-                        if i in pages_input:
-                            reached += 1
-                            reached_vertex.append(i)
+                        if i in pages_input:   # if the page is one of the input
+                            reached += 1       # add the reached value
+                            reached_vertex.append(i)  # append the reached vertex
                             
             except TypeError:
                 number_of_click += 1
@@ -243,7 +244,9 @@ REQUEST 4
 """
 
 def cat_subgraph(category_1, category_2, categories_dict, dataframe):
-
+    """
+    function that create the subgraph of the category chosen
+    """
     #first get the two lists of pages of the categories
     a = categories_dict[category_1]
     b = categories_dict[category_2]
@@ -346,11 +349,19 @@ def distances_from_category(input_category,categories_dict, dataframe, all_nodes
                     aux.append(x)
             merged = np.array(list(itertools.chain(*aux)))
             m = np.median(merged)
-            print(m)
+            #print(m)
             results[cat1] = m
     write_pickle('data/' + input_category, results)
     return (results)
 
+def pretty_table(table):    
+    d_view = [ (v,k) for k,v in table.items() ]
+    d_view.sort(reverse=False) # natively sort tuples by first element
+    t = PrettyTable(['Categories', 'Distance'])
+    for v,k in d_view:
+        if not np.isnan(v):
+            t.add_row([k,v])
+    print(t)
 
 def score_categories(category_name):
     if isinstance(category_name, str):
@@ -432,3 +443,12 @@ def page_rank(max_iterations, categories_red, inbound, outbound):
             normalized_vertex = normalized_vertex_temp
         pr_categories[cat] = np.max(np.array(list(normalized_vertex.values())))
     return pr_categories
+
+def pretty_table_2(table):    
+    d_view = [ (v,k) for k,v in table.items() ]
+    d_view.sort(reverse=False) # natively sort tuples by first element
+    t = PrettyTable(['Categories', 'Score', 'Page Rank'])
+    for v,k in d_view:
+        if not np.isnan(v):
+            t.add_row([k,v])
+    print(t)
