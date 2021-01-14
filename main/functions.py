@@ -373,12 +373,62 @@ def score_categories(category_name):
 REQUEST 6
 -------------------------------------------------------------------
 """
-def out_degree_centrality(g):
-    out_deg_list = []
+def inbound(data):
+    """
+    create a dictionary to get the inbound vertices of each vertex
+    """
+    concat = [data['Source'], data['Target']]    # concat all the nodes
+    all_nodes = list(pd.concat(concat).unique()) 
+    inbound = {}
+    for node in tqdm(all_nodes):
+        inbound[node] = data[data['Target'] == node].Source.values.tolist()
+    return inbound
+
+def out_bound(g):
+    """
+    create a dictionary to get the number of outbound vertices of each vertex
+    """
+    out_deg = {}
     for key in g.graph_d:
         if isinstance(g.graph_d[key], list):
-            out_deg_list.append(len(g.graph_d[key]))
-        elif (isinstance(g.graph_d[key], int)):
-            out_deg_list.append(1)
-    out_deg = Counter(sorted(out_deg_list))
+            out_deg[key] = len(g.graph_d[key])
+        elif (isinstance(g.graph_d[key], int)): 
+            out_deg[key] = 1
     return out_deg
+
+def page_rank(max_iterations, categories_red, inbound, outbound):    
+    """
+    function of the implementation of the Page Rank algorithm
+    
+    Parameters
+    ----------
+    max_iterations : int, number of iterations
+    categories_red : dict, dictionary of categories
+    inbound : dict, dictionary of inbound vertex
+    outbound : dict, dictionary of outbound vertex
+
+    Returns
+    -------
+    dict with keys as categories and values as score of Page Rank
+    """
+    pr_categories = {}
+    
+    for cat in tqdm(categories_red):
+        normalized_vertex = dict.fromkeys(categories_red[cat], 
+                                          1/len(categories_red[cat])) 
+        for i in range(max_iterations):
+            normalized_vertex_temp = dict.fromkeys(categories_red[cat], 0) 
+            for vertex in normalized_vertex:
+                pr = 0
+                try:
+                    for in_bound in inbound[vertex]:
+                        try:
+                            pr += normalized_vertex[in_bound]/outbound[in_bound]
+                        except KeyError:
+                            pass
+                except KeyError:
+                    pass
+                normalized_vertex_temp[vertex] = pr
+            normalized_vertex = normalized_vertex_temp
+        pr_categories[cat] = np.max(np.array(list(normalized_vertex.values())))
+    return pr_categories
