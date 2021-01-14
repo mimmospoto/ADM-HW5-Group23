@@ -105,7 +105,7 @@ def IsSymmetric(mat, g):
     # looping on each vertex to assign the edges == 1
     for vertex in g.graph_d:   
         if isinstance(g.graph_d[vertex], int):
-            mat[g.graph_d[vertex], target] = 1
+            mat[vertex, g.graph_d[vertex]] = 1
         else:
             for target in g.graph_d[vertex]:
                 mat[vertex, target] = 1
@@ -118,9 +118,9 @@ def IsSymmetric(mat, g):
 REQUEST 2
 -------------------------------------------------------------------
 """
-def pages(page, click, dic):
+def pages_reached(page, click, dic):
     total_pages = [] # This list will store number of pages
-    page_list = [] #This list will store input vlaue initially and then will add correspondence value as per number of click
+    page_list = [] #This list will store input value initially and then will add correspondence value as per number of click
     page_list.append(str(page))
     for no_of_click in range(click): #This will run as per number of clicks
         new_lst = []                 
