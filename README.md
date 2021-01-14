@@ -5,7 +5,7 @@ The objective of the project was to Explore Wikipedia's hyperlinks network by bu
 ## File Descriptions
 The repository contains the "main" folder which contains the following files:
 
-1. [main.ipynb](https://nbviewer.jupyter.org/github/mimmospoto/ADM-HW5-Group23/blob/main/main/main.ipynb):
+1. `main.ipynb`:
 
         > you can find the main notebook with all the exercise completed.
  
