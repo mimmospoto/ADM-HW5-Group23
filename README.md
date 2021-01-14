@@ -18,4 +18,4 @@ The repository contains the "main" folder which contains the following files:
 * Domenico Spoto
 * Alessandro Quattrociocchi
 * Leonardo Masci
-* Vaibhav Tomar
+* Vaibhav Tomar 
